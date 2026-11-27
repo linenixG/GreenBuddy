@@ -3,13 +3,14 @@ package com.example.greenbuddy;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.monster.Monster; // Базовый класс всех монстров
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -44,9 +45,24 @@ public class GreenBuddyEntity extends PathfinderMob {
         this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 8.0F));
 
-        // Атакуем ВСЕХ монстров, но пропускаем криперов по строковому имени (чтобы не взрывались)
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Monster.class, 10, true, false, 
-            (entity) -> !entity.getType().toString().contains("creeper") && this.isAggressive));
+        // Самый простой конструктор, который только есть
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Monster.class, true));
+    }
+
+    // Вот здесь мы фильтруем цели (не бьем криперов и не бьем, если не в режиме атаки)
+    @Override
+    public void setTarget(LivingEntity target) {
+        if (target != null) {
+            // Если это крипер - игнорируем
+            if (target.getType().toString().contains("creeper")) {
+                return;
+            }
+            // Если это монстр, но мы не в режиме агрессии - игнорируем
+            if (target instanceof Monster && !this.isAggressive) {
+                return;
+            }
+        }
+        super.setTarget(target);
     }
 
     @Override
