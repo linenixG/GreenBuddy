@@ -42,9 +42,9 @@ public class GreenBuddyEntity extends PathfinderMob {
         super.tick();
         
         if (this.isAggressive && this.tickCount % 20 == 0) {
-            Monster nearestMonster = this.level().getNearestEntity(
-                Monster.class, this.getBoundingBox().inflate(16.0D), this, this.getX(), this.getY(), this.getZ()
-            );
+           Monster nearestMonster = this.level().getNearestEntity(
+    Monster.class, net.minecraft.world.entity.ai.targeting.TargetingConditions.DEFAULT, this, this.getX(), this.getY(), this.getZ(), this.getBoundingBox().inflate(16.0D)
+);
             if (nearestMonster != null) {
                 this.setTarget(nearestMonster);
             }
