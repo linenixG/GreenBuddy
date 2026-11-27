@@ -1,7 +1,6 @@
 package com.example.greenbuddy;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -10,16 +9,14 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
 
 public class GreenBuddyEntity extends PathfinderMob {
     public boolean isAggressive = false;
@@ -49,15 +46,15 @@ public class GreenBuddyEntity extends PathfinderMob {
         this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 8.0F));
 
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Monster.class, 10, true, false, 
-            (entity) -> !(entity instanceof Creeper) && this.isAggressive));
+        // Атакуем только зомби и скелетов (криперов и других игнорируем)
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Zombie.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Skeleton.class, true));
     }
 
     @Override
     public void tick() {
         super.tick();
         
-        // Логика следования
         if (this.isFollowing && this.getTarget() == null) {
             Player player = this.level().getNearestPlayer(this, 20.0D);
             if (player != null && this.distanceTo(player) > 3.0F) {
@@ -65,14 +62,12 @@ public class GreenBuddyEntity extends PathfinderMob {
             }
         }
 
-        // Логика охраны
         if (this.guardPos != null && this.getTarget() == null) {
             if (this.distanceToSqr(this.guardPos.getX(), this.guardPos.getY(), this.guardPos.getZ()) > 4.0D) {
                 this.getNavigation().moveTo(this.guardPos.getX(), this.guardPos.getY(), this.guardPos.getZ(), 1.0D);
             }
         }
 
-        // Логика строительства
         if (this.isBuilding && this.buildCooldown <= 0) {
             buildHouse();
         }
@@ -83,7 +78,6 @@ public class GreenBuddyEntity extends PathfinderMob {
 
     private void buildHouse() {
         BlockPos center = this.blockPosition();
-        // Строим коробку 3x3 из досок
         for (int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 1; z++) {
                 for (int y = 0; y <= 2; y++) {
@@ -96,7 +90,6 @@ public class GreenBuddyEntity extends PathfinderMob {
                 }
             }
         }
-        // Крыша
         for (int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 1; z++) {
                 this.level().setBlockAndUpdate(center.offset(x, 3, z), Blocks.OAK_PLANKS.defaultBlockState());
@@ -106,12 +99,9 @@ public class GreenBuddyEntity extends PathfinderMob {
         this.buildCooldown = 200;
     }
 
-    // Лечение
     public void healBuddy() {
         this.setHealth(this.getMaxHealth());
-        if (this.level() instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(ParticleTypes.HEART, this.getX(), this.getY() + 1, this.getZ(), 10, 0.5, 0.5, 0.5, 0.1);
-        }
+        this.level().addParticle(ParticleTypes.HEART, this.getX(), this.getY() + 1, this.getZ(), 0.0D, 0.0D, 0.0D);
     }
 
     static class SmartChopTreeGoal extends MoveToBlockGoal {
@@ -136,7 +126,6 @@ public class GreenBuddyEntity extends PathfinderMob {
                 if (state.is(BlockTags.LOGS)) {
                     this.buddy.level().destroyBlock(pos, false);
                     this.buddy.woodCollected++;
-                    this.buddy.spawnAtLocation(new ItemStack(Items.OAK_LOG), 1.0F);
                     this.buddy.getNavigation().stop();
                     this.nextStartTick = 40;
                 }
