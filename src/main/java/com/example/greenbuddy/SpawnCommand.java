@@ -11,7 +11,7 @@ public class SpawnCommand {
             GreenBuddyEntity buddy = new GreenBuddyEntity(GreenBuddyMod.GREEN_BUDDY, context.getSource().getLevel());
             buddy.setPos(context.getSource().getPosition().x, context.getSource().getPosition().y, context.getSource().getPosition().z);
             context.getSource().getLevel().addFreshEntity(buddy);
-            context.getSource().sendSuccess(() -> Component.literal("Green Buddy spawned!"), false);
+            context.getSource().sendSuccess(() -> Component.literal("Green Buddy spawned! (Combat Mode)"), false);
             return 1;
         }));
     }
