@@ -32,7 +32,12 @@ public class GreenBuddyMod implements ModInitializer {
     @Override
     public void onInitialize() {
         FabricDefaultAttributeRegistry.register(GREEN_BUDDY, GreenBuddyEntity.createAttributes());
-        // Команды удалены, моб теперь боевой по умолчанию
+        
+        // ТОЛЬКО РЕГИСТРАЦИЯ СПАВНА
+        net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            SpawnCommand.register(dispatcher);
+        });
+        
         LOGGER.info("Green Buddy Mod loaded! Combat Mode Active.");
     }
 }
