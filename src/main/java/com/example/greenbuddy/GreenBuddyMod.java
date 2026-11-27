@@ -20,7 +20,7 @@ public class GreenBuddyMod implements ModInitializer {
             Identifier.fromNamespaceAndPath(MOD_ID, "green_buddy"),
             EntityType.Builder.of(GreenBuddyEntity::new, MobCategory.CREATURE)
                     .sized(0.6F, 1.8F)
-                    .build("green_buddy")
+                    .build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID, "green_buddy")))
     );
 
     @Override
