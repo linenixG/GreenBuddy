@@ -7,10 +7,11 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import java.util.List;
 
 public class GreenBuddyEntity extends PathfinderMob {
     public boolean isAggressive = false;
@@ -34,22 +35,21 @@ public class GreenBuddyEntity extends PathfinderMob {
         this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.2D, false));
         this.goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(3, new LookAtPlayerGoal(this, Player.class, 8.0F));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Monster.class, true));
     }
 
     @Override
     public void tick() {
         super.tick();
         
+        // Атака мобов
         if (this.isAggressive && this.tickCount % 20 == 0) {
-           Monster nearestMonster = this.level().getNearestEntity(
-    Monster.class, net.minecraft.world.entity.ai.targeting.TargetingConditions.DEFAULT, this, this.getX(), this.getY(), this.getZ(), this.getBoundingBox().inflate(16.0D)
-);
-            if (nearestMonster != null) {
-                this.setTarget(nearestMonster);
+            List<Monster> monsters = this.level().getEntitiesOfClass(Monster.class, new AABB(this.blockPosition()).inflate(16.0D));
+            if (!monsters.isEmpty()) {
+                this.setTarget(monsters.get(0)); // Берем первого попавшегося
             }
         }
 
+        // Рубка дерева
         if (!this.isAggressive && this.chopCooldown <= 0) {
             BlockPos targetPos = findNearbyLog();
             if (targetPos != null) {
