@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.entity.EntityRenderers;
 public class GreenBuddyClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        // Явно указываем провайдер рендерера
         EntityRenderers.register(GreenBuddyMod.GREEN_BUDDY, GreenBuddyRenderer::new);
     }
 }
