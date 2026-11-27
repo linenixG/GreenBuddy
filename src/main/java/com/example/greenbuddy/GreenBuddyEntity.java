@@ -9,9 +9,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.monster.Monster; // Базовый класс всех монстров
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -46,9 +44,9 @@ public class GreenBuddyEntity extends PathfinderMob {
         this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 8.0F));
 
-        // Атакуем только зомби и скелетов (криперов и других игнорируем)
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Zombie.class, true));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Skeleton.class, true));
+        // Атакуем ВСЕХ монстров, но пропускаем криперов по строковому имени (чтобы не взрывались)
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Monster.class, 10, true, false, 
+            (entity) -> !entity.getType().toString().contains("creeper") && this.isAggressive));
     }
 
     @Override
