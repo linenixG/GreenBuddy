@@ -1,7 +1,6 @@
 package com.example.greenbuddy;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -33,10 +32,7 @@ public class GreenBuddyMod implements ModInitializer {
     @Override
     public void onInitialize() {
         FabricDefaultAttributeRegistry.register(GREEN_BUDDY, GreenBuddyEntity.createAttributes());
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            SpawnCommand.register(dispatcher);
-            BuddyCommand.register(dispatcher);
-        });
-        LOGGER.info("Green Buddy Mod loaded!");
+        // Команды удалены, моб теперь боевой по умолчанию
+        LOGGER.info("Green Buddy Mod loaded! Combat Mode Active.");
     }
 }
