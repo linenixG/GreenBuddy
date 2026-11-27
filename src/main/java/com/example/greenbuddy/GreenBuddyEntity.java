@@ -2,6 +2,7 @@ package com.example.greenbuddy;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags; // <--- ВОТ ЭТОТ ИМПОРТ
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,7 +16,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -46,11 +46,9 @@ public class GreenBuddyEntity extends PathfinderMob {
         this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
 
-        // САМЫЙ ПРОСТОЙ КОНСТРУКТОР (без лямбд)
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Monster.class, true));
     }
 
-    // Фильтр криперов
     @Override
     public void setTarget(LivingEntity target) {
         if (target != null && target.getType().toString().contains("creeper")) {
@@ -109,10 +107,13 @@ public class GreenBuddyEntity extends PathfinderMob {
                 this.buddy.getNavigation().stop();
                 if (this.attackDelay <= 0 && this.buddy.attackCooldown <= 0) {
                     ItemStack heldItem = this.buddy.getItemInHand(InteractionHand.MAIN_HAND);
-                    float damage = 4.0F;
-                    if (heldItem.getItem() instanceof SwordItem sword) {
-                        damage = sword.getDamage();
+                    float damage = 4.0F; // Базовый урон
+                    
+                    // ЕСЛИ В РУКЕ МЕЧ (проверка по тегу)
+                    if (heldItem.is(ItemTags.SWORDS)) {
+                        damage += 3.0F; // Даем бонус к урону
                     }
+                    
                     target.hurt(this.buddy.damageSources().mobAttack(this.buddy), damage);
                     this.buddy.swing(InteractionHand.MAIN_HAND);
                     this.attackDelay = 20;
@@ -137,10 +138,11 @@ public class GreenBuddyEntity extends PathfinderMob {
 
         @Override
         public boolean canUse() {
-            if (this.buddy.getTarget() != null) return false;
+            if (this.buddy.getTarget() != null) return false; // Не подбираем в бою
             List<ItemEntity> items = this.buddy.level().getEntitiesOfClass(ItemEntity.class, new AABB(this.buddy.blockPosition()).inflate(10.0D));
             for (ItemEntity item : items) {
-                if (item.getItem().getItem() instanceof SwordItem && this.buddy.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) {
+                // Проверяем по тегу мечей
+                if (item.getItem().is(ItemTags.SWORDS) && this.buddy.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) {
                     this.targetItem = item;
                     return true;
                 }
