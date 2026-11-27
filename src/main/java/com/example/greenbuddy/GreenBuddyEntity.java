@@ -136,7 +136,7 @@ public class GreenBuddyEntity extends PathfinderMob {
                 if (state.is(BlockTags.LOGS)) {
                     this.buddy.level().destroyBlock(pos, false);
                     this.buddy.woodCollected++;
-                    this.buddy.spawnAtLocation(new ItemStack(Items.OAK_LOG));
+                    this.buddy.spawnAtLocation(new ItemStack(Items.OAK_LOG), 1.0F);
                     this.buddy.getNavigation().stop();
                     this.nextStartTick = 40;
                 }
