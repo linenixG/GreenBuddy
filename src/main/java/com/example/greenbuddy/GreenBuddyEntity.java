@@ -3,6 +3,7 @@ package com.example.greenbuddy;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob; // <--- ВОТ ОН, НЕДОСТАЮЩИЙ ИМПОРТ
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -41,15 +42,13 @@ public class GreenBuddyEntity extends PathfinderMob {
     public void tick() {
         super.tick();
         
-        // Атака мобов
         if (this.isAggressive && this.tickCount % 20 == 0) {
             List<Monster> monsters = this.level().getEntitiesOfClass(Monster.class, new AABB(this.blockPosition()).inflate(16.0D));
             if (!monsters.isEmpty()) {
-                this.setTarget(monsters.get(0)); // Берем первого попавшегося
+                this.setTarget(monsters.get(0));
             }
         }
 
-        // Рубка дерева
         if (!this.isAggressive && this.chopCooldown <= 0) {
             BlockPos targetPos = findNearbyLog();
             if (targetPos != null) {
